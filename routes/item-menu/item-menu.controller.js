@@ -68,6 +68,7 @@ const Create = async (req, res, next) => {
       Imagen: faker.image.food(),
       FechaCreacion: faker.date.recent(),
       FechaModificacion: null,
+      Activo: true,
     };
 
     Items.docs.push(itemToCreate);

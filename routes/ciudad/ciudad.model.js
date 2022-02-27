@@ -16,6 +16,7 @@ class CiudadModel {
         UsuarioCreo: faker.datatype.uuid(),
         FechaModificacion: faker.date.recent(),
         UsuarioModificacion: faker.datatype.uuid(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_ciudad);

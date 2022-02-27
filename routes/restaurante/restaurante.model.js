@@ -23,6 +23,7 @@ class RestauranteModel {
         LugaresTotales: faker.datatype.number(),
         FechaCreacion: faker.date.past(),
         FechaModificacion: faker.date.recent(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_restaurante);

@@ -68,6 +68,7 @@ const Create = async (req, res, next) => {
       UsuarioCreo: faker.datatype.uuid(),
       FechaModificacion: null,
       UsuarioModificacion: null,
+      Activo: true,
     };
 
     ciudades.docs.push(cityToCreate);

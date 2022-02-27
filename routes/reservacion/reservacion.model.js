@@ -18,7 +18,7 @@ class ReservacionModel {
         Costo: faker.datatype.number(),
         FechaCreacion: faker.date.past(),
         FechaModificacion: faker.date.recent(),
-        Activa: faker.datatype.boolean(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_reservacion);

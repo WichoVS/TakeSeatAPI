@@ -65,7 +65,7 @@ const Create = async (req, res, next) => {
       Comentario: _body.Comentario,
       FechaCalificacion: faker.date.past(),
       FechaVisita: faker.date.past(),
-      Activa: true,
+      Activo: true,
     };
     Reviews.docs.push(reviewToCreate);
     res

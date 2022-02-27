@@ -15,6 +15,7 @@ class PaisModel {
         UsuarioCreo: faker.datatype.uuid(),
         FechaModificacion: faker.date.recent(),
         UsuarioModifico: faker.datatype.uuid(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_pais);

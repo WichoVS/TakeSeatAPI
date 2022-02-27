@@ -17,6 +17,7 @@ class ItemMenuModel {
         Imagen: faker.image.food(),
         FechaCreacion: faker.date.past(),
         FechaModificacion: faker.date.recent(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_item);

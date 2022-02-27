@@ -16,7 +16,7 @@ class ReviewModel {
         Comentario: faker.lorem.sentence(),
         FechaCalificacion: faker.date.past(),
         FechaVisita: faker.date.past(),
-        Activa: faker.datatype.boolean(),
+        Activo: faker.datatype.boolean(),
       };
 
       this.docs.push(_review);

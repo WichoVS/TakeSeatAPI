@@ -69,7 +69,7 @@ const Create = async (req, res, next) => {
       Costo: faker.datatype.number(),
       FechaCreacion: faker.date.past(),
       FechaModificacion: faker.date.recent(),
-      Activa: true,
+      Activo: true,
     };
     Reservaciones.docs.push(reservacionToCreate);
     res

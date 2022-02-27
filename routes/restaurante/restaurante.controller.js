@@ -73,6 +73,7 @@ const Create = async (req, res, next) => {
       LugaresTotales: _body.LugaresTotales,
       FechaCreacion: faker.date.recent(),
       FechaModificacion: null,
+      Activo: true,
     };
 
     Restaurantes.docs.push(restauranteToCreate);
