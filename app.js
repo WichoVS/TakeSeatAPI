@@ -38,7 +38,7 @@ app.use("/api/v1/promocion", promocionRouter);
 app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/reservacion", reservacionRouter);
 app.use("/api/v1/restaurante", restauranteRouter);
-app.use("/api/v1/usuarioRouter", usuarioRouter);
+app.use("/api/v1/usuario", usuarioRouter);
 app.use(logsErrors);
 app.use(boomErrorHandler);
 app.use(errorHandler);
