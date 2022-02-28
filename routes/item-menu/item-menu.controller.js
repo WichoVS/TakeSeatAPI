@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _item = Items.docs.find((i) => i._id == _params.id);
+    const _item = Items.docs.find((i) => i._id == _params._id);
     if (!_item) throw boom.notFound("No se encontró ningún item con ese Id");
     res
       .send({
@@ -38,7 +38,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var itemToUpdate = Items.docs.findIndex((i) => i._id == _params.id);
+    var itemToUpdate = Items.docs.findIndex((i) => i._id == _params._id);
     if (itemToUpdate == -1) throw boom.notFound("No se encontró ningún item con ese Id");
 
     Items.docs[itemToUpdate] = _body;

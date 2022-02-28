@@ -15,7 +15,7 @@ class CategoriaModel {
         FechaCreacion: faker.date.past(),
         UsuarioCreo: faker.datatype.uuid(),
         FechaModificacion: faker.date.recent(),
-        UsuarioModificacion: faker.datatype.uuid(),
+        UsuarioModifico: faker.datatype.uuid(),
         Activo: faker.datatype.boolean(),
       };
 

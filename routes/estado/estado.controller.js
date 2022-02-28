@@ -21,7 +21,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _estado = estados.docs.find((e) => e._id == _params.id);
+    const _estado = estados.docs.find((e) => e._id == _params._id);
     if (!_estado) throw boom.notFound("No se encontró el estado con ese Id");
 
     res
@@ -40,7 +40,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var edoToUpd = estados.docs.findIndex((e) => e._id == _params.id);
+    var edoToUpd = estados.docs.findIndex((e) => e._id == _params._id);
     if (edoToUpd == -1) throw boom.notFound("No se encontró un estado con ese Id");
     estados.docs[edoToUpd] = _body;
     const edoUptd = estados.docs[edoToUpd];

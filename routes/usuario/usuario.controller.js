@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _usuario = Usuarios.docs.find((u) => u._id == _params.id);
+    const _usuario = Usuarios.docs.find((u) => u._id == _params._id);
     if (!_usuario) throw boom.notFound("No se encontró el usuario con este Id");
     res
       .send({
@@ -38,7 +38,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    const indexDoc = Usuarios.docs.findIndex((u) => u._id == _params.id);
+    const indexDoc = Usuarios.docs.findIndex((u) => u._id == _params._id);
     if (indexDoc == -1) throw boom.notFound("No se encontró el usuario con este Id");
 
     Usuarios.docs[indexDoc] = _body;

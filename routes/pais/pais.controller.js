@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _pais = Paises.docs.find((p) => p._id == _params.id);
+    const _pais = Paises.docs.find((p) => p._id == _params._id);
     if (!_pais) throw boom.notFound("No se encontró un país con ese Id");
 
     res
@@ -39,7 +39,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var paisToUpd = Paises.docs.findIndex((p) => p._id == _params.id);
+    var paisToUpd = Paises.docs.findIndex((p) => p._id == _params._id);
     if (paisToUpd == -1) throw boom.notFound("No se encontró un país con ese Id");
     Paises.docs[paisToUpd] = _body;
     const paisUpdated = Paises.docs[paisToUpd];

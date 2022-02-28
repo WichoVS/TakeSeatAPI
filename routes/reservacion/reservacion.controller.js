@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _reservacion = Reservaciones.docs.find((r) => r._id == _params.id);
+    const _reservacion = Reservaciones.docs.find((r) => r._id == _params._id);
     if (!_reservacion) throw boom.notFound("No se encontró la reservación con ese Id");
     res
       .send({
@@ -38,7 +38,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    const indexDoc = Reservaciones.docs.findIndex((r) => r._id == _params.id);
+    const indexDoc = Reservaciones.docs.findIndex((r) => r._id == _params._id);
     if (indexDoc == -1) throw boom.notFound("No se encontró la reservación con ese Id");
     Reservaciones.docs[indexDoc] = _body;
     const _reservacion = Reservaciones.docs[indexDoc];

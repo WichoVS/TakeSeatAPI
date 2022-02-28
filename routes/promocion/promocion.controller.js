@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _promo = Promociones.docs.find((p) => p._id == _params.id);
+    const _promo = Promociones.docs.find((p) => p._id == _params._id);
     if (!_promo) throw boom.notFound("No se encontró una promoción con ese Id");
 
     res
@@ -39,7 +39,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var indexDoc = Promociones.docs.findIndex((p) => p._id == _params.id);
+    var indexDoc = Promociones.docs.findIndex((p) => p._id == _params._id);
     if (indexDoc == -1) throw boom.notFound("No se encontró una promoción con ese Id");
     Promociones.docs[indexDoc] = _body;
     const PromoUpdated = Promociones.docs[indexDoc];

@@ -21,7 +21,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _ciudad = ciudades.docs.find((c) => c._id === _params.id);
+    const _ciudad = ciudades.docs.find((c) => c._id === _params._id);
     if (!_ciudad) {
       throw boom.notFound("No se encontró ninguna ciudad con ese Id");
     }
@@ -41,7 +41,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var catToUpd = ciudades.docs.findIndex((c) => c._id == _params.id);
+    var catToUpd = ciudades.docs.findIndex((c) => c._id == _params._id);
     if (catToUpd == -1) throw boom.notFound("No se encontró ninguna ciudad con ese Id");
     ciudades.docs[catToUpd] = _body;
     const _cityUptd = ciudades.docs[catToUpd];
@@ -67,7 +67,7 @@ const Create = async (req, res, next) => {
       FechaCreacion: faker.date.recent(),
       UsuarioCreo: faker.datatype.uuid(),
       FechaModificacion: null,
-      UsuarioModificacion: null,
+      UsuarioModifico: null,
       Activo: true,
     };
 

@@ -21,7 +21,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const categoria = categorias.categorias.find((categoria) => categoria._id === _params.id);
+    const categoria = categorias.categorias.find((categoria) => categoria._id === _params._id);
     if (!categoria) {
       throw boom.notFound("No se ha encontrado ninguna categoria con ese Id");
     } else {
@@ -42,7 +42,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var categoriaToUpd = categorias.categorias.findIndex((c) => c._id == _params.id);
+    var categoriaToUpd = categorias.categorias.findIndex((c) => c._id == _params._id);
     if (categoriaToUpd == -1)
       throw boom.notFound("No se ha encontrado ninguna categoria con ese Id");
     categorias.categorias[categoriaToUpd] = _body;
@@ -69,7 +69,7 @@ const Create = async (req, res, next) => {
       FechaCreacion: faker.date.recent(),
       UsuarioCreo: faker.datatype.uuid(),
       FechaModificacion: null,
-      UsuarioModificacion: null,
+      UsuarioModifico: null,
       Activo: true,
     };
 

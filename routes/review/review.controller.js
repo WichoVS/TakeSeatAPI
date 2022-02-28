@@ -20,7 +20,7 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _review = Reviews.docs.find((r) => r._id == _params.id);
+    const _review = Reviews.docs.find((r) => r._id == _params._id);
     if (!_review) throw boom.notFound("No se encontró la Review con esta Id");
     res
       .send({
@@ -38,7 +38,7 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    const indexDoc = Reviews.docs.findIndex((r) => r._id == _params.id);
+    const indexDoc = Reviews.docs.findIndex((r) => r._id == _params._id);
     if (indexDoc == -1) throw boom.notFound("No se encontró la Review con esta Id");
     Reviews.docs[indexDoc] = _body;
     const _review = Reviews.docs[indexDoc];
