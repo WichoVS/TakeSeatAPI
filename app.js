@@ -1,7 +1,10 @@
 var express = require("express");
 var logger = require("morgan");
 var cors = require("cors");
+const validatorHandler = require("./middleware/validator.handler");
+const { createUsuario, loginUsuario } = require("./DTO/usuario.dto");
 
+const { IniciarSesion, RegistrarUsuario, protect } = require("./middleware/auth");
 var { boomErrorHandler, errorHandler, logsErrors } = require("./middleware/error.handler");
 var categoriaRouter = require("./routes/categoria/categoria.router");
 var ciudadRouter = require("./routes/ciudad/ciudad.router");
@@ -20,6 +23,10 @@ app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 
+app.post("/iniciarSesion", validatorHandler(loginUsuario, "body"), IniciarSesion);
+app.post("/registrarUsuario", validatorHandler(createUsuario, "body"), RegistrarUsuario);
+
+app.use("/api", protect);
 app.use("/api/v1/categoria", categoriaRouter);
 app.use("/api/v1/ciudad", ciudadRouter);
 app.use("/api/v1/estado", estadoRouter);

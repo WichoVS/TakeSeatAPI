@@ -1,26 +1,39 @@
-const faker = require("faker");
+const mongoose = require("mongoose");
 
-class PaisModel {
-  constructor() {
-    this.docs = [];
-    this.generate();
-  }
+const PaisSchema = new mongoose.Schema(
+  {
+    Nombre: {
+      type: String,
+      required: true,
+    },
+    FechaCreacion: {
+      type: mongoose.SchemaTypes.Date,
+      required: false,
+    },
+    UsuarioCreo: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Usuario",
+      required: false,
+    },
+    FechaModificacion: {
+      type: mongoose.SchemaTypes.Date,
+      required: false,
+    },
+    UsuarioModifico: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Usuario",
+      required: false,
+    },
+    Activo: {
+      type: Boolean,
+      required: false,
+    },
+  },
+  { versionKey: false }
+);
 
-  generate() {
-    for (let index = 0; index < 20; index++) {
-      var _pais = {
-        _id: faker.datatype.uuid(),
-        Nombre: faker.address.country(),
-        FechaCreacion: faker.date.past(),
-        UsuarioCreo: faker.datatype.uuid(),
-        FechaModificacion: faker.date.recent(),
-        UsuarioModifico: faker.datatype.uuid(),
-        Activo: faker.datatype.boolean(),
-      };
+PaisSchema.index({ Nombre: 1 }, { unique: true });
 
-      this.docs.push(_pais);
-    }
-  }
-}
+const Pais = mongoose.model("Pais", PaisSchema);
 
-module.exports = PaisModel;
+module.exports = Pais;

@@ -1,27 +1,45 @@
-const faker = require("faker");
+const mongoose = require("mongoose");
+const Estado = require("../estado/estado.model");
 
-class CiudadModel {
-  constructor() {
-    this.docs = [];
-    this.generate();
+const CiudadSchema = new mongoose.Schema(
+  {
+    Nombre: {
+      type: String,
+      required: true,
+    },
+    Estado: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: Estado,
+      required: false,
+    },
+    FechaCreacion: {
+      type: mongoose.SchemaTypes.Date,
+      required: false,
+    },
+    UsuarioCreo: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Usuario",
+      required: false,
+    },
+    FechaModificacion: {
+      type: mongoose.SchemaTypes.Date,
+      required: false,
+    },
+    UsuarioModifico: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Usuario",
+      requried: false,
+    },
+    Activo: {
+      type: Boolean,
+      required: false,
+    },
+  },
+  {
+    versionKey: false,
   }
+);
 
-  generate() {
-    for (let index = 0; index < 20; index++) {
-      var _ciudad = {
-        _id: faker.datatype.uuid(),
-        Nombre: faker.address.city(),
-        Estado: faker.datatype.uuid(),
-        FechaCreacion: faker.date.past(),
-        UsuarioCreo: faker.datatype.uuid(),
-        FechaModificacion: faker.date.recent(),
-        UsuarioModifico: faker.datatype.uuid(),
-        Activo: faker.datatype.boolean(),
-      };
+const Ciudad = mongoose.model("Ciudad", CiudadSchema);
 
-      this.docs.push(_ciudad);
-    }
-  }
-}
-
-module.exports = CiudadModel;
+module.exports = Ciudad;
