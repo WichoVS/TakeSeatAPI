@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-
+var db = require("../middleware/db");
 var app = require("../app");
 // eslint-disable-next-line no-unused-vars
 var debug = require("debug")("takeseatapi:server");
@@ -13,7 +13,7 @@ var http = require("http");
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || "3000");
+var port = normalizePort(process.env.PORT || "5000");
 app.set("port", port);
 
 /**
@@ -82,7 +82,8 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 
-function onListening() {
+async function onListening() {
+  await db.Conectar;
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   // eslint-disable-next-line no-console

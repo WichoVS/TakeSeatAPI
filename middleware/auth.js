@@ -19,12 +19,26 @@ const verifyToken = (token) =>
 
 const RegistrarUsuario = async (req, res, next) => {
   try {
-    const user = await Usuario.create({});
+    const user = await Usuario.create({
+      Nombre: req.body.Nombre,
+      Usuario: req.body.Usuario,
+      Correo: req.body.Correo,
+      Imagen: req.body.Imagen,
+      Pais: req.body.Pais,
+      Estado: req.body.Estado,
+      Ciudad: req.body.Ciudad,
+      Password: req.body.Password,
+      FechaCreacion: req.body.FechaCreacion,
+      FechaModificacion: req.body.FechaModificacion,
+      Administrador: req.body.Administrador,
+    });
+
+    const token = newToken(user);
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: user,
+        data: { user, token },
       })
       .end();
   } catch (error) {
@@ -68,27 +82,31 @@ const IniciarSesion = async (req, res, next) => {
 
 const protect = async (req, res, next) => {
   const bearer = req.headers.authorization;
-
-  if (!bearer || !bearer.startsWith("Bearer ")) {
-    throw boom.unauthorized("Es necesario un Token válido");
-  }
-
-  const token = bearer.split("Bearer ")[1].trim();
-
-  let payload;
+  console.log(req.body);
   try {
-    payload = await verifyToken(token);
+    if (!bearer || !bearer.startsWith("Bearer ")) {
+      throw boom.unauthorized("Es necesario un Token válido");
+    }
+
+    const token = bearer.split("Bearer ")[1].trim();
+
+    let payload;
+    try {
+      payload = await verifyToken(token);
+    } catch (error) {
+      throw boom.unauthorized("Es necesario un Token válido");
+    }
+    const user = await Usuario.findById(payload.id).select("-Password").lean().select();
+
+    if (!user) {
+      throw boom.unauthorized("Es necesario un Token válido");
+    }
+
+    req.Usuario = user;
+    next();
   } catch (error) {
-    throw boom.unauthorized("Es necesario un Token válido");
+    next(error);
   }
-  const user = await Usuario.findById(payload.id).select("-Password").lean().select();
-
-  if (!user) {
-    throw boom.unauthorized("Es necesario un Token válido");
-  }
-
-  req.Usuario = user;
-  next();
 };
 
 module.exports = { RegistrarUsuario, IniciarSesion, protect };

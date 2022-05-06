@@ -1,5 +1,6 @@
 const boom = require("@hapi/boom");
 const faker = require("faker");
+const Usuario = require("./usuario.model");
 const UsuarioModel = require("./usuario.model");
 var Usuarios = new UsuarioModel();
 
@@ -20,13 +21,17 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _usuario = Usuarios.docs.find((u) => u._id == _params._id);
-    if (!_usuario) throw boom.notFound("No se encontró el usuario con este Id");
+
+    let user = await Usuario.findById({ _id: _params._id })
+      .select("Nombre Usuario Correo Imagen")
+      .lean()
+      .exec();
+    if (user === null) throw boom.notFound("No se encontró el usuario con este Id");
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _usuario,
+        data: user,
       })
       .end();
   } catch (error) {

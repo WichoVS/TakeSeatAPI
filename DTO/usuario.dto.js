@@ -19,14 +19,14 @@ const loginUsuario = Joi.object({
 });
 
 const createUsuario = Joi.object({
-  _id: _id.allow(null, "empty"),
+  _id: _id.allow(null),
   Nombre: Nombre.required(),
   Usuario: Usuario.required(),
   Correo: Correo.required(),
   Imagen: Imagen.required(),
-  Pais: Pais,
-  Estado: Estado,
-  Ciudad: Ciudad,
+  Pais: Pais.allow(null),
+  Estado: Estado.allow(null),
+  Ciudad: Ciudad.allow(null),
   Password: Password.required(),
   FechaCreacion: FechaCreacion.default(Date.now).required(),
   FechaModificacion: FechaModificacion.allow(null),

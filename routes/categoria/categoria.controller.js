@@ -1,16 +1,14 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const CategoriaModel = require("./categoria.model");
-
-var categorias = new CategoriaModel();
+const Categoria = require("./categoria.model");
 
 const GetAll = async (req, res, next) => {
   try {
+    const cats = await Categoria.find({}).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: categorias.categorias,
+        data: cats,
       })
       .end();
   } catch (error) {
@@ -21,18 +19,16 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const categoria = categorias.categorias.find((categoria) => categoria._id === _params._id);
-    if (!categoria) {
-      throw boom.notFound("No se ha encontrado ninguna categoria con ese Id");
-    } else {
-      res
-        .send({
-          success: true,
-          message: "Petición Exitosa",
-          data: categoria,
-        })
-        .end();
-    }
+
+    const catUpd = await Categoria.findById({ _id: _params._id }).lean().exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: catUpd,
+      })
+      .end();
   } catch (error) {
     next(error);
   }
@@ -42,16 +38,46 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var categoriaToUpd = categorias.categorias.findIndex((c) => c._id == _params._id);
-    if (categoriaToUpd == -1)
-      throw boom.notFound("No se ha encontrado ninguna categoria con ese Id");
-    categorias.categorias[categoriaToUpd] = _body;
-    const catUpdated = categorias.categorias[categoriaToUpd];
+    const catUpd = await Categoria.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        Descripcion: _body.Descripcion,
+        FechaModificacion: new Date(),
+        UsuarioModifico: _body.UsuarioModifico,
+        Activo: _body.Activo,
+      },
+      { new: true }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: catUpdated,
+        data: catUpd,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const ToggleStatus = async (req, res, next) => {
+  try {
+    const _params = req.params;
+
+    const oldCat = await Categoria.findById({ _id: _params._id }).lean().exec();
+
+    const catUpd = await Categoria.findByIdAndUpdate(
+      { _id: _params._id },
+      { Activo: !oldCat.Activo },
+      { new: true }
+    );
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: catUpd,
       })
       .end();
   } catch (error) {
@@ -62,23 +88,22 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var objToCreate = {
-      _id: faker.datatype.uuid(),
+
+    const newCat = await Categoria.create({
       Nombre: _body.Nombre,
       Descripcion: _body.Descripcion,
-      FechaCreacion: faker.date.recent(),
-      UsuarioCreo: faker.datatype.uuid(),
+      FechaCreacion: new Date(),
+      UsuarioCreo: _body.UsuarioCreo,
       FechaModificacion: null,
       UsuarioModifico: null,
-      Activo: true,
-    };
+      Activo: _body.Activo,
+    });
 
-    categorias.categorias.push(objToCreate);
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: objToCreate,
+        data: newCat,
       })
       .end();
   } catch (error) {
@@ -91,4 +116,5 @@ module.exports = {
   GetById,
   Update,
   Create,
+  ToggleStatus,
 };
