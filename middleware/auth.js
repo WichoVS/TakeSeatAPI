@@ -82,7 +82,6 @@ const IniciarSesion = async (req, res, next) => {
 
 const protect = async (req, res, next) => {
   const bearer = req.headers.authorization;
-  console.log(req.body);
   try {
     if (!bearer || !bearer.startsWith("Bearer ")) {
       throw boom.unauthorized("Es necesario un Token válido");
