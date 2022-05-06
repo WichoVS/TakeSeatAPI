@@ -1,7 +1,7 @@
 const express = require("express");
 const validatorHandler = require("../../middleware/validator.handler");
 const Router = express.Router();
-const { Create, GetAll, GetById, Update } = require("./pais.controller");
+const { Create, GetAll, GetById, Update, ToggleStatus } = require("./pais.controller");
 const { createPais, getPais, updatePais } = require("../../DTO/pais.dto");
 
 Router.get("/getAllPaises", GetAll);
@@ -13,5 +13,6 @@ Router.patch(
   validatorHandler(updatePais, "body"),
   Update
 );
+Router.patch("/toggleStatus/:_id", validatorHandler(getPais, "params"), ToggleStatus);
 
 module.exports = Router;

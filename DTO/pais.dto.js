@@ -17,9 +17,9 @@ const UsuarioModifico = Joi.string();
 const Activo = Joi.boolean();
 
 const createPais = Joi.object({
-  _id: _id.allow(null, "empty"),
+  _id: _id.allow(null, ""),
   Nombre: Nombre.required(),
-  FechaCreacion: FechaCreacion.default(Date.now).required(),
+  FechaCreacion: FechaCreacion.optional().allow(null),
   UsuarioCreo: UsuarioCreo.required(),
   FechaModificacion: FechaModificacion.allow(null),
   UsuarioModifico: UsuarioModifico.allow(null),
@@ -29,9 +29,9 @@ const createPais = Joi.object({
 const updatePais = Joi.object({
   _id: _id.required(),
   Nombre: Nombre,
-  FechaCreacion: FechaCreacion,
-  UsuarioCreo: UsuarioCreo,
-  FechaModificacion: FechaModificacion.default(Date.now).required(),
+  FechaCreacion: FechaCreacion.optional().allow(null),
+  UsuarioCreo: UsuarioCreo.optional().allow(null),
+  FechaModificacion: FechaModificacion.allow(null),
   UsuarioModifico: UsuarioModifico.required(),
   Activo: Activo,
 });

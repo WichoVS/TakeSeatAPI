@@ -1,15 +1,14 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const PaisModel = require("./pais.model");
-const Paises = new PaisModel();
+const Pais = require("./pais.model");
 
 const GetAll = async (req, res, next) => {
   try {
+    const paisesArr = await Pais.find({}).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Paises.docs,
+        data: paisesArr,
       })
       .end();
   } catch (error) {
@@ -20,14 +19,14 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _pais = Paises.docs.find((p) => p._id == _params._id);
-    if (!_pais) throw boom.notFound("No se encontró un país con ese Id");
+
+    const paisById = await Pais.findById({ _id: _params._id }).lean().exec();
 
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _pais,
+        data: paisById,
       })
       .end();
   } catch (error) {
@@ -39,16 +38,51 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var paisToUpd = Paises.docs.findIndex((p) => p._id == _params._id);
-    if (paisToUpd == -1) throw boom.notFound("No se encontró un país con ese Id");
-    Paises.docs[paisToUpd] = _body;
-    const paisUpdated = Paises.docs[paisToUpd];
+
+    const paisUpd = await Pais.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        FechaModificacion: new Date(),
+        UsuarioModifico: _body.UsuarioModifico,
+      },
+      {
+        new: true,
+      }
+    );
 
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: paisUpdated,
+        data: paisUpd,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const ToggleStatus = async (req, res, next) => {
+  try {
+    const _params = req.params;
+
+    const paisOld = await Pais.findById({ _id: _params._id }).lean().exec();
+    const paisUpd = await Pais.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Activo: !paisOld.Activo,
+      },
+      {
+        new: true,
+      }
+    );
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: paisUpd,
       })
       .end();
   } catch (error) {
@@ -59,23 +93,21 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var paisToCreate = {
-      _id: faker.datatype.uuid(),
+
+    const newPais = await Pais.create({
       Nombre: _body.Nombre,
-      Pais: faker.datatype.uuid(),
-      FechaCreacion: faker.date.recent(),
-      UsuarioCreo: faker.datatype.uuid(),
+      FechaCreacion: new Date(),
+      UsuarioCreo: _body.UsuarioCreo,
       FechaModificacion: null,
       UsuarioModifico: null,
       Activo: true,
-    };
+    });
 
-    Paises.docs.push(paisToCreate);
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: paisToCreate,
+        data: newPais,
       })
       .end();
   } catch (error) {
@@ -88,4 +120,5 @@ module.exports = {
   GetById,
   Update,
   Create,
+  ToggleStatus,
 };
