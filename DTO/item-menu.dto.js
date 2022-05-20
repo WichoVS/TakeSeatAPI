@@ -19,29 +19,35 @@ const Imagen = Joi.string();
 const FechaCreacion = Joi.date();
 const FechaModificacion = Joi.date().greater(Joi.ref("FechaCreacion"));
 const Activo = Joi.boolean();
+const Especial = Joi.boolean();
+const Tipo = Joi.string();
 
 const createItem = Joi.object({
-  _id: _id.allow(null, "empty"),
+  _id: _id.allow(null, ""),
   Nombre: Nombre.required(),
   Descripcion: Descripcion.required(),
-  Restaurante: Restaurante.required(),
-  Costo: Costo.required(),
   Imagen: Imagen.required(),
-  FechaCreacion: FechaCreacion.default(Date.now).required(),
+  Costo: Costo.required(),
+  Restaurante: Restaurante.required(),
+  FechaCreacion: FechaCreacion.allow(null),
   FechaModificacion: FechaModificacion.allow(null),
   Activo: Activo.default(true).required(),
+  Especial: Especial.required(),
+  Tipo: Tipo.required(),
 });
 
 const updateItem = Joi.object({
   _id: _id.required(),
   Nombre: Nombre,
   Descripcion: Descripcion,
-  Restaurante: Restaurante,
-  Costo: Costo,
   Imagen: Imagen,
-  FechaCreacion: FechaCreacion,
-  FechaModificacion: FechaModificacion.default(Date.now).required(),
-  Activo: Activo,
+  Costo: Costo,
+  Restaurante: Restaurante,
+  FechaCreacion: FechaCreacion.allow(null),
+  FechaModificacion: FechaModificacion.allow(null),
+  Activo: Activo.default(true).required(),
+  Especial: Especial.required(),
+  Tipo: Tipo.required(),
 });
 
 const getItem = Joi.object({

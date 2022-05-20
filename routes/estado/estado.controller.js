@@ -1,16 +1,29 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const EstadoModel = require("./estado.model");
+const Estado = require("./estado.model");
 
-const estados = new EstadoModel();
-
-const GetAll = async (req, res, next) => {
+const GetActives = async (req, res, next) => {
   try {
+    const estados = await Estado.find({ Activo: true }).lean().exec();
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: estados.docs,
+        data: estados,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetAll = async (req, res, next) => {
+  try {
+    const estados = await Estado.find({}).lean().exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: estados,
       })
       .end();
   } catch (error) {
@@ -21,14 +34,14 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _estado = estados.docs.find((e) => e._id == _params._id);
-    if (!_estado) throw boom.notFound("No se encontró el estado con ese Id");
+
+    const estado = await Estado.findById({ _id: _params._id }).lean().exec();
 
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _estado,
+        data: estado,
       })
       .end();
   } catch (error) {
@@ -36,19 +49,55 @@ const GetById = async (req, res, next) => {
   }
 };
 
-const Update = async (req, res, next) => {
+const ToggleStatus = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _body = req.body;
-    var edoToUpd = estados.docs.findIndex((e) => e._id == _params._id);
-    if (edoToUpd == -1) throw boom.notFound("No se encontró un estado con ese Id");
-    estados.docs[edoToUpd] = _body;
-    const edoUptd = estados.docs[edoToUpd];
+    const oldEstado = await Estado.findById({ _id: _params._id }).lean().exec();
+    const newEstado = await Estado.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Activo: !oldEstado.Activo,
+      },
+      {
+        new: true,
+      }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: edoUptd,
+        data: newEstado,
+      })
+      .end();
+  } catch (error) {
+    next(next);
+  }
+};
+
+const Update = async (req, res, next) => {
+  try {
+    const _params = req.params;
+    const _body = req.body;
+
+    const updEstado = await Estado.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        Pais: _body.Pais,
+        FechaModificacion: new Date(),
+        UsuarioModifico: _body.UsuarioModifico,
+      },
+      {
+        new: true,
+      }
+    );
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: updEstado,
       })
       .end();
   } catch (error) {
@@ -59,22 +108,22 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var edoToCreate = {
-      _id: faker.datatype.uuid(),
+
+    const newEstado = await Estado.create({
       Nombre: _body.Nombre,
-      Pais: faker.datatype.uuid(),
-      FechaCreacion: faker.date.past(),
-      UsuarioCreo: faker.datatype.uuid(),
+      Pais: _body.Pais,
+      FechaCreacion: new Date(),
+      UsuarioCreo: _body.UsuarioCreo,
       FechaModificacion: null,
       UsuarioModifico: null,
       Activo: true,
-    };
-    estados.docs.push(edoToCreate);
+    });
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: edoToCreate,
+        data: newEstado,
       })
       .end();
   } catch (error) {
@@ -87,4 +136,6 @@ module.exports = {
   GetById,
   Update,
   Create,
+  ToggleStatus,
+  GetActives,
 };

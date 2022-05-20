@@ -1,29 +1,51 @@
-const faker = require("faker");
+const mongoose = require("mongoose");
 
-class ReservacionModel {
-  constructor() {
-    this.docs = [];
-    this.generate();
+const ReservacionSchema = new mongoose.Schema(
+  {
+    UsuarioReservo: {
+      type: mongoose.Types.ObjectId,
+      ref: "Usuario",
+      required: true,
+    },
+    Restaurante: {
+      type: mongoose.Types.ObjectId,
+      ref: "Restaurante",
+      required: true,
+    },
+    Horario: {
+      type: Number,
+      required: true,
+    },
+    Dia: {
+      type: String,
+      required: true,
+    },
+    Costo: {
+      type: Number,
+      required: true,
+    },
+    FechaCreacion: {
+      type: String,
+      required: true,
+    },
+    FechaModificacion: {
+      type: String,
+      required: false,
+    },
+    Activo: {
+      type: Boolean,
+      required: true,
+    },
+    Pagado: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  {
+    versionKey: false,
   }
+);
 
-  generate() {
-    for (let index = 0; index < 20; index++) {
-      var _reservacion = {
-        _id: faker.datatype.uuid(),
-        NoReservacion: faker.datatype.number(),
-        UsuarioReservo: faker.datatype.uuid(),
-        Restaurante: faker.datatype.uuid(),
-        Horario: faker.time.recent(),
-        Dia: faker.date.soon(),
-        Costo: faker.datatype.number(),
-        FechaCreacion: faker.date.past(),
-        FechaModificacion: faker.date.recent(),
-        Activo: faker.datatype.boolean(),
-      };
+const Reservacion = mongoose.model("Reservacion", ReservacionSchema);
 
-      this.docs.push(_reservacion);
-    }
-  }
-}
-
-module.exports = ReservacionModel;
+module.exports = Reservacion;

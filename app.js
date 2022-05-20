@@ -16,12 +16,14 @@ var reviewRouter = require("./routes/review/review.router");
 var reservacionRouter = require("./routes/reservacion/reservacion.router");
 var restauranteRouter = require("./routes/restaurante/restaurante.router");
 var usuarioRouter = require("./routes/usuario/usuario.router");
+var descripcionRouter = require("./routes/descripcion/descripcion.router");
 
 var app = express();
 app.use(cors());
 
 app.use(logger("dev"));
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb" }));
 
 app.post("/iniciarSesion", validatorHandler(loginUsuario, "body"), IniciarSesion);
 app.post("/registrarUsuario", validatorHandler(createUsuario, "body"), RegistrarUsuario);
@@ -37,6 +39,8 @@ app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/reservacion", reservacionRouter);
 app.use("/api/v1/restaurante", restauranteRouter);
 app.use("/api/v1/usuario", usuarioRouter);
+app.use("/api/v1/descripcion", descripcionRouter);
+
 app.use(logsErrors);
 app.use(boomErrorHandler);
 app.use(errorHandler);

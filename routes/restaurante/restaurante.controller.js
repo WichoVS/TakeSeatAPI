@@ -1,15 +1,23 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const RestauranteModel = require("./restaurante.model");
-const Restaurantes = new RestauranteModel();
+const Reservacion = require("../reservacion/reservacion.model");
+const Restaurante = require("./restaurante.model");
+var ObjectId = require("mongoose").Types.ObjectId;
 
 const GetAll = async (req, res, next) => {
   try {
+    const restaurantes = await Restaurante.find({})
+      .populate("Administrador", "Nombre")
+      .populate("Categoria", "Nombre")
+      .populate("Pais", "Nombre")
+      .populate("Estado", "Nombre")
+      .populate("Ciudad", "Nombre")
+      .lean()
+      .exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Restaurantes.docs,
+        data: restaurantes,
       })
       .end();
   } catch (error) {
@@ -20,13 +28,20 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _restaurante = Restaurantes.docs.find((r) => r._id == _params._id);
-    if (!_restaurante) throw boom.notFound("No se encontró un Restaurante con esa Id");
+
+    const restaurante = await Restaurante.findById({ _id: _params._id })
+      .populate("Administrador", "Nombre")
+      .populate("Categoria", "Nombre")
+      .populate("Pais", "Nombre")
+      .populate("Estado", "Nombre")
+      .populate("Ciudad", "Nombre")
+      .lean()
+      .exec();
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _restaurante,
+        data: restaurante,
       })
       .end();
   } catch (error) {
@@ -34,20 +49,62 @@ const GetById = async (req, res, next) => {
   }
 };
 
-const Update = async (req, res, next) => {
+const ToggleStatus = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _body = req.body;
-    const indexDoc = Restaurantes.docs.find((r) => r._id == _params._id);
-    if (indexDoc == -1) throw boom.notFound("No se encontró un Restaurante con esa Id");
 
-    Restaurantes.docs[indexDoc] = _body;
-    const _restaurante = Restaurantes.docs[indexDoc];
+    const restaurante = await Restaurante.findById({ _id: _params._id }).lean().exec();
+    const restauranteUpd = await Restaurante.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Activo: !restaurante.Activo,
+      },
+      {
+        new: true,
+      }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _restaurante,
+        data: restauranteUpd,
+      })
+      .end();
+  } catch (error) {
+    next(next);
+  }
+};
+
+const Update = async (req, res, next) => {
+  try {
+    const _params = req.params;
+    const _body = req.body;
+
+    const updRestaurante = await Restaurante.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        Ubicacion: _body.Ubicacion,
+        Pais: _body.Pais,
+        Estado: _body.Estado,
+        Ciudad: _body.Ciudad,
+        Imagen: _body.Imagen,
+        HorarioApertura: _body.HorarioApertura,
+        HorarioCierre: _body.HorarioCierre,
+        PrecioReservacion: _body.PrecioReservacion,
+        LugaresTotales: _body.LugaresTotales,
+        UsuarioModifico: _body.UsuarioModifico,
+        FechaModificacion: new Date(),
+      },
+      { new: true }
+    );
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: updRestaurante,
       })
       .end();
   } catch (error) {
@@ -58,30 +115,91 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var restauranteToCreate = {
-      _id: faker.datatype.uuid(),
+
+    var newRestaurante = await Restaurante.create({
       Nombre: _body.Nombre,
+      Categoria: _body.Categoria,
       Administrador: _body.Administrador,
       Ubicacion: _body.Ubicacion,
-      Pais: faker.datatype.uuid(),
-      Estado: faker.datatype.uuid(),
-      Ciudad: faker.datatype.uuid(),
-      Imagen: faker.image.business(),
-      HorarioApertura: faker.time.recent(),
-      HorarioCierre: faker.time.recent(),
-      PrecioReservacion: faker.commerce.price(),
+      Pais: _body.Pais,
+      Estado: _body.Estado,
+      Ciudad: _body.Ciudad,
+      Imagen: _body.Imagen,
+      HorarioApertura: _body.HorarioApertura,
+      HorarioCierre: _body.HorarioCierre,
+      PrecioReservacion: _body.PrecioReservacion,
       LugaresTotales: _body.LugaresTotales,
-      FechaCreacion: faker.date.recent(),
+      UsuarioCreo: _body.UsuarioCreo,
+      FechaCreacion: new Date(),
+      UsuarioModifico: null,
       FechaModificacion: null,
       Activo: true,
-    };
+    });
 
-    Restaurantes.docs.push(restauranteToCreate);
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: restauranteToCreate,
+        data: newRestaurante,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetRestauranteInfoReservacion = async (req, res, next) => {
+  try {
+    const _b = req.body;
+    var info = {
+      LugaresDisponibles: 0,
+      HorarioApertura: 0,
+      HorarioCierre: 0,
+      Costo: 0,
+    };
+
+    const _dia = new Date(_b.Fecha);
+    var query = {
+      Restaurante: new ObjectId(_b._id),
+      Horario: _b.Hora,
+      Dia: _dia.toISOString(),
+      Activo: true,
+    };
+    const reservaciones = await Reservacion.find(query).lean().exec();
+
+    const infoRest = await Restaurante.findById({ _id: _b._id }).lean().exec();
+
+    info.HorarioApertura = infoRest.HorarioApertura;
+    info.HorarioCierre = infoRest.HorarioCierre;
+    info.LugaresDisponibles = infoRest.LugaresTotales - reservaciones.length;
+    info.Costo = infoRest.PrecioReservacion;
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: info,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetRestauranteByFilter = async (req, res, next) => {
+  try {
+    const _b = req.body;
+
+    const query = { Nombre: { $regex: ".*" + _b.Restaurante + ".*" } };
+    if (_b.Categoria !== "") query.Categoria = _b.Categoria;
+
+    const restaurantes = await Restaurante.find(query).lean().exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: restaurantes,
       })
       .end();
   } catch (error) {
@@ -94,4 +212,7 @@ module.exports = {
   GetById,
   Update,
   Create,
+  ToggleStatus,
+  GetRestauranteInfoReservacion,
+  GetRestauranteByFilter,
 };

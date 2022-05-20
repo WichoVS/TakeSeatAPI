@@ -115,10 +115,27 @@ const Create = async (req, res, next) => {
   }
 };
 
+const GetActivePaises = async (req, res, next) => {
+  try {
+    const paises = await Pais.find({ Activo: true }).lean().exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: paises,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   GetAll,
   GetById,
   Update,
   Create,
   ToggleStatus,
+  GetActivePaises,
 };

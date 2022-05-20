@@ -1,16 +1,16 @@
 const boom = require("@hapi/boom");
-const faker = require("faker");
+const Restaurante = require("../restaurante/restaurante.model");
 const Usuario = require("./usuario.model");
-const UsuarioModel = require("./usuario.model");
-var Usuarios = new UsuarioModel();
 
 const GetAll = async (req, res, next) => {
   try {
+    const usuarios = await Usuario.find({}).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Usuarios.docs,
+        data: usuarios,
       })
       .end();
   } catch (error) {
@@ -43,16 +43,26 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    const indexDoc = Usuarios.docs.findIndex((u) => u._id == _params._id);
-    if (indexDoc == -1) throw boom.notFound("No se encontró el usuario con este Id");
 
-    Usuarios.docs[indexDoc] = _body;
-    const _usuario = Usuarios.docs[indexDoc];
+    const updUsuario = await Usuario.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Imagen: _body.Imagen,
+        Nombre: _body.Nombre,
+        Correo: _body.Correo,
+        Usuario: _body.Usuario,
+        Password: _body.Password,
+      },
+      {
+        new: true,
+      }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _usuario,
+        data: updUsuario,
       })
       .end();
   } catch (error) {
@@ -60,31 +70,33 @@ const Update = async (req, res, next) => {
   }
 };
 
-const Create = async (req, res, next) => {
+const GetUsuarioRestaurante = async (req, res, next) => {
   try {
-    const _body = req.body;
-    var _usuarioToCreate = {
-      _id: faker.datatype.uuid(),
-      Nombre: _body.Nombre,
-      Usuario: _body.Usuario,
-      Correo: _body.Correo,
-      Imagen: faker.image.avatar(),
-      Pais: faker.datatype.uuid(),
-      Estado: faker.datatype.uuid(),
-      Ciudad: faker.datatype.uuid(),
-      Password: _body.Password,
-      FechaCreacion: faker.date.past(),
-      FechaModificacion: null,
-      Administrador: false,
-    };
-    Usuarios.docs.push(_usuarioToCreate);
-    res
-      .send({
-        success: true,
-        message: "Petición Exitosa",
-        data: _usuarioToCreate,
-      })
-      .end();
+    const _p = req.params;
+
+    const restaurante = await Restaurante.findOne({
+      Administrador: _p._id,
+    })
+      .lean()
+      .exec();
+
+    if (restaurante === null) {
+      res
+        .send({
+          success: true,
+          message: "Petición Exitosa",
+          data: "",
+        })
+        .end();
+    } else {
+      res
+        .send({
+          success: true,
+          message: "Petición Exitosa",
+          data: restaurante._id,
+        })
+        .end();
+    }
   } catch (error) {
     next(error);
   }
@@ -94,5 +106,5 @@ module.exports = {
   GetAll,
   GetById,
   Update,
-  Create,
+  GetUsuarioRestaurante,
 };

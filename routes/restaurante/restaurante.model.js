@@ -1,34 +1,89 @@
-const faker = require("faker");
+const mongoose = require("mongoose");
 
-class RestauranteModel {
-  constructor() {
-    this.docs = [];
-    this.generate();
+const RestauranteSchema = new mongoose.Schema(
+  {
+    Nombre: {
+      required: true,
+      type: String,
+    },
+    Categoria: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Categoria",
+    },
+    Administrador: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Usuario",
+    },
+    Ubicacion: {
+      required: true,
+      type: String,
+    },
+    Pais: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Pais",
+    },
+    Estado: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Estado",
+    },
+    Ciudad: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Ciudad",
+    },
+    Imagen: {
+      required: true,
+      type: String,
+    },
+    HorarioApertura: {
+      required: true,
+      type: Number,
+    },
+    HorarioCierre: {
+      required: true,
+      type: Number,
+    },
+    PrecioReservacion: {
+      required: true,
+      type: Number,
+    },
+    LugaresTotales: {
+      required: true,
+      type: Number,
+    },
+    UsuarioCreo: {
+      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "Usuario",
+    },
+    FechaCreacion: {
+      required: true,
+      type: mongoose.SchemaTypes.Date,
+    },
+    UsuarioModifico: {
+      required: false,
+      type: mongoose.Types.ObjectId,
+    },
+    FechaModificacion: {
+      required: false,
+      type: mongoose.SchemaTypes.Date,
+    },
+    Activo: {
+      required: true,
+      type: Boolean,
+    },
+  },
+  {
+    versionKey: false,
   }
+);
 
-  generate() {
-    for (let index = 0; index < 20; index++) {
-      var _restaurante = {
-        _id: faker.datatype.uuid(),
-        Nombre: faker.company.companyName(),
-        Administrador: `${faker.name.firstName()} ${faker.name.lastName()}`,
-        Ubicacion: faker.internet.url(),
-        Pais: faker.datatype.uuid(),
-        Estado: faker.datatype.uuid(),
-        Ciudad: faker.datatype.uuid(),
-        Imagen: faker.image.business(),
-        HorarioApertura: faker.time.recent(),
-        HorarioCierre: faker.time.recent(),
-        PrecioReservacion: faker.commerce.price(),
-        LugaresTotales: faker.datatype.number(),
-        FechaCreacion: faker.date.past(),
-        FechaModificacion: faker.date.recent(),
-        Activo: faker.datatype.boolean(),
-      };
+RestauranteSchema.index({ Nombre: 1 }, { unique: true });
 
-      this.docs.push(_restaurante);
-    }
-  }
-}
+const Restaurante = mongoose.model("Restaurante", RestauranteSchema);
 
-module.exports = RestauranteModel;
+module.exports = Restaurante;

@@ -1,12 +1,17 @@
 const mongoose = require("mongoose");
 
-const CategoriaSchema = new mongoose.Schema(
+const DescripcionSchema = new mongoose.Schema(
   {
-    Nombre: {
-      type: String,
+    Restaurante: {
+      type: mongoose.Types.ObjectId,
+      ref: "Restaurante",
       required: true,
     },
     Descripcion: {
+      type: String,
+      required: true,
+    },
+    Slogan: {
       type: String,
       required: true,
     },
@@ -15,28 +20,23 @@ const CategoriaSchema = new mongoose.Schema(
       required: false,
     },
     UsuarioCreo: {
-      type: String,
-      required: false,
+      type: mongoose.SchemaTypes.ObjectId,
       ref: "Usuario",
+      required: false,
     },
     FechaModificacion: {
       type: mongoose.SchemaTypes.Date,
       required: false,
     },
     UsuarioModifico: {
-      type: String,
+      type: mongoose.SchemaTypes.ObjectId,
       ref: "Usuario",
-    },
-    Activo: {
-      type: Boolean,
-      required: true,
+      required: false,
     },
   },
   { versionKey: false }
 );
 
-CategoriaSchema.index({ Nombre: 1 }, { unique: true });
+const Descripcion = mongoose.model("DescripcionRestaurante", DescripcionSchema);
 
-const Categoria = mongoose.model("Categoria", CategoriaSchema);
-
-module.exports = Categoria;
+module.exports = Descripcion;

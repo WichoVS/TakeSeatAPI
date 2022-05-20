@@ -1,16 +1,29 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const CiudadModel = require("./ciudad.model");
+const Ciudad = require("./ciudad.model");
 
-var ciudades = new CiudadModel();
-
-const GetAll = async (req, res, next) => {
+const GetActives = async (req, res, next) => {
   try {
+    const ciudades = await Ciudad.find({ Activo: true }).lean().exec();
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: ciudades.docs,
+        data: ciudades,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetAll = async (req, res, next) => {
+  try {
+    const ciudades = await Ciudad.find({}).lean().exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: ciudades,
       })
       .end();
   } catch (error) {
@@ -21,15 +34,14 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _ciudad = ciudades.docs.find((c) => c._id === _params._id);
-    if (!_ciudad) {
-      throw boom.notFound("No se encontró ninguna ciudad con ese Id");
-    }
+
+    const ciudad = await Ciudad.findById({ _id: _params._id }).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _ciudad,
+        data: ciudad,
       })
       .end();
   } catch (error) {
@@ -41,15 +53,48 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var catToUpd = ciudades.docs.findIndex((c) => c._id == _params._id);
-    if (catToUpd == -1) throw boom.notFound("No se encontró ninguna ciudad con ese Id");
-    ciudades.docs[catToUpd] = _body;
-    const _cityUptd = ciudades.docs[catToUpd];
+
+    const updCiudad = await Ciudad.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        Estado: _body.Estado,
+        FechaModificacion: new Date(),
+        UsuarioModifico: _body.UsuarioModifico,
+      },
+      { new: true }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _cityUptd,
+        data: updCiudad,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const ToggleStatus = async (req, res, next) => {
+  try {
+    const _params = req.params;
+
+    const oldCiudad = await Ciudad.findById({ _id: _params._id }).lean().exec();
+    const newCiudad = await Ciudad.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Activo: !oldCiudad.Activo,
+      },
+      { new: true }
+    );
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: newCiudad,
       })
       .end();
   } catch (error) {
@@ -60,23 +105,20 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var cityToCreate = {
-      _id: faker.datatype.uuid(),
-      Nombre: _body.Nombre,
-      Estado: faker.datatype.uuid(),
-      FechaCreacion: faker.date.recent(),
-      UsuarioCreo: faker.datatype.uuid(),
-      FechaModificacion: null,
-      UsuarioModifico: null,
-      Activo: true,
-    };
 
-    ciudades.docs.push(cityToCreate);
+    const newCiudad = await Ciudad.create({
+      Nombre: _body.Nombre,
+      Estado: _body.Estado,
+      FechaCreacion: new Date(),
+      UsuarioCreo: _body.UsuarioCreo,
+      Activo: true,
+    });
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: cityToCreate,
+        data: newCiudad,
       })
       .end();
   } catch (error) {
@@ -89,4 +131,6 @@ module.exports = {
   GetById,
   Update,
   Create,
+  GetActives,
+  ToggleStatus,
 };

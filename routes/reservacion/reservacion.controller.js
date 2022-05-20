@@ -1,15 +1,27 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const ReservacionModel = require("./reservacion.model");
-const Reservaciones = new ReservacionModel();
+const Reservacion = require("./reservacion.model");
 
-const GetAll = async (req, res, next) => {
+const CreateReservacion = async (req, res, next) => {
   try {
+    const _b = req.body;
+
+    const newReservacion = await Reservacion.create({
+      UsuarioReservo: _b.UsuarioReservo,
+      Restaurante: _b.Restaurante,
+      Horario: _b.Horario,
+      Dia: new Date(_b.Dia).toISOString(),
+      Costo: _b.Costo,
+      FechaCreacion: new Date(),
+      FechaModificacion: null,
+      Activo: _b.Activo,
+      Pagado: _b.Pagado,
+    });
+
     res
+      .status(200)
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Reservaciones.docs,
+        data: newReservacion,
       })
       .end();
   } catch (error) {
@@ -17,16 +29,15 @@ const GetAll = async (req, res, next) => {
   }
 };
 
-const GetById = async (req, res, next) => {
+const GetAllReservaciones = async (req, res, next) => {
   try {
-    const _params = req.params;
-    const _reservacion = Reservaciones.docs.find((r) => r._id == _params._id);
-    if (!_reservacion) throw boom.notFound("No se encontró la reservación con ese Id");
+    const reservaciones = await Reservacion.find({}).lean().exec();
     res
+      .status(200)
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _reservacion,
+        data: reservaciones,
       })
       .end();
   } catch (error) {
@@ -34,20 +45,16 @@ const GetById = async (req, res, next) => {
   }
 };
 
-const Update = async (req, res, next) => {
+const GetByIdReservacion = async (req, res, next) => {
   try {
-    const _params = req.params;
-    const _body = req.body;
-    const indexDoc = Reservaciones.docs.findIndex((r) => r._id == _params._id);
-    if (indexDoc == -1) throw boom.notFound("No se encontró la reservación con ese Id");
-    Reservaciones.docs[indexDoc] = _body;
-    const _reservacion = Reservaciones.docs[indexDoc];
+    const reservacion = await Reservacion.findById({ _id: req.params._id }).lean().exec();
 
     res
+      .status(200)
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _reservacion,
+        data: reservacion,
       })
       .end();
   } catch (error) {
@@ -55,28 +62,142 @@ const Update = async (req, res, next) => {
   }
 };
 
-const Create = async (req, res, next) => {
+const UpdateReservacion = async (req, res, next) => {
   try {
-    // eslint-disable-next-line no-unused-vars
-    const _body = req.body;
-    var reservacionToCreate = {
-      _id: faker.datatype.uuid(),
-      NoReservacion: faker.datatype.number(),
-      UsuarioReservo: faker.datatype.uuid(),
-      Restaurante: faker.datatype.uuid(),
-      Horario: faker.time.recent(),
-      Dia: faker.date.soon(),
-      Costo: faker.datatype.number(),
-      FechaCreacion: faker.date.past(),
-      FechaModificacion: faker.date.recent(),
-      Activo: true,
-    };
-    Reservaciones.docs.push(reservacionToCreate);
+    const _p = req.params;
+    const _b = req.body;
+
+    const reservacionNew = await Reservacion.findByIdAndUpdate(
+      { _id: _p._id },
+      {
+        Horario: _b.Horario,
+        Dia: _b.Dia,
+        FechaModificacion: _b.FechaModificacion,
+        Activo: _b.Activo,
+        Pagado: _b.Pagado,
+      },
+      { new: true }
+    );
+
     res
+      .status(200)
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: reservacionToCreate,
+        data: reservacionNew,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetReservacionesByRestaurante = async (req, res, next) => {
+  try {
+    const _p = req.params;
+
+    const reservaciones = await Reservacion.find({ Restaurante: _p._id }).lean().exec();
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reservaciones,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetReservacionesByUser = async (req, res, next) => {
+  try {
+    const _p = req.params;
+
+    const reservaciones = await Reservacion.find({ UsuarioReservo: _p._id }).lean().exec();
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reservaciones,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const CancelarReservacion = async (req, res, next) => {
+  try {
+    const _p = req.params;
+
+    const reservacion = await Reservacion.findByIdAndUpdate(
+      { _id: _p._id },
+      {
+        Activo: false,
+      },
+      {
+        new: true,
+      }
+    );
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reservacion,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const PagarReservacion = async (req, res, next) => {
+  try {
+    const _p = req.params;
+
+    const reservacion = await Reservacion.findByIdAndUpdate(
+      { _id: _p._id },
+      {
+        Pagado: true,
+      },
+      {
+        new: true,
+      }
+    );
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reservacion,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetMisReservaciones = async (req, res, next) => {
+  try {
+    const _p = req.params;
+    const reservaciones = await Reservacion.find({ UsuarioReservo: _p })
+      .populate("Restaurante", "Nombre")
+      .lean()
+      .exec();
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reservaciones,
       })
       .end();
   } catch (error) {
@@ -85,8 +206,13 @@ const Create = async (req, res, next) => {
 };
 
 module.exports = {
-  GetAll,
-  GetById,
-  Update,
-  Create,
+  CreateReservacion,
+  GetAllReservaciones,
+  GetByIdReservacion,
+  UpdateReservacion,
+  GetReservacionesByRestaurante,
+  GetReservacionesByUser,
+  CancelarReservacion,
+  PagarReservacion,
+  GetMisReservaciones,
 };

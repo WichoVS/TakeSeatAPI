@@ -1,15 +1,16 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const ItemMenuModel = require("./item-menu.model");
-var Items = new ItemMenuModel();
+const ItemMenu = require("./item-menu.model");
 
-const GetAll = async (req, res, next) => {
+const GetItemsMenuByRestaurante = async (req, res, next) => {
   try {
+    const idR = req.params._id;
+
+    const Items = await ItemMenu.find({ Restaurante: idR }).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Items.docs,
+        data: Items,
       })
       .end();
   } catch (error) {
@@ -17,16 +18,17 @@ const GetAll = async (req, res, next) => {
   }
 };
 
-const GetById = async (req, res, next) => {
+const GetItemMenuById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _item = Items.docs.find((i) => i._id == _params._id);
-    if (!_item) throw boom.notFound("No se encontró ningún item con ese Id");
+
+    const Item = await ItemMenu.findById({ _id: _params._id }).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _item,
+        data: Item,
       })
       .end();
   } catch (error) {
@@ -34,21 +36,34 @@ const GetById = async (req, res, next) => {
   }
 };
 
-const Update = async (req, res, next) => {
+const UpdateItemMenu = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    var itemToUpdate = Items.docs.findIndex((i) => i._id == _params._id);
-    if (itemToUpdate == -1) throw boom.notFound("No se encontró ningún item con ese Id");
 
-    Items.docs[itemToUpdate] = _body;
-    const itemUpdated = Items.docs[itemToUpdate];
+    const itemNew = await ItemMenu.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Nombre: _body.Nombre,
+        Descripcion: _body.Descripcion,
+        Imagen: _body.Imagen,
+        Costo: _body.Costo,
+        Restaurante: _body.Restaurante,
+        FechaModificacion: new Date(),
+        Activo: _body.Activo,
+        Especial: _body.Activo,
+        Tipo: _body.Tipo,
+      },
+      {
+        new: true,
+      }
+    );
 
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: itemUpdated,
+        data: itemNew,
       })
       .end();
   } catch (error) {
@@ -56,22 +71,22 @@ const Update = async (req, res, next) => {
   }
 };
 
-const Create = async (req, res, next) => {
+const CreateItemMenu = async (req, res, next) => {
   try {
     const _body = req.body;
-    var itemToCreate = {
-      _id: faker.datatype.uuid(),
+
+    const itemToCreate = await ItemMenu.create({
       Nombre: _body.Nombre,
       Descripcion: _body.Descripcion,
-      Restaurante: faker.datatype.uuid(),
-      Costo: parseInt(faker.commerce.price()),
-      Imagen: faker.image.food(),
-      FechaCreacion: faker.date.recent(),
+      Imagen: _body.Imagen,
+      Costo: _body.Costo,
+      Restaurante: _body.Restaurante,
+      FechaCreacion: new Date(),
       FechaModificacion: null,
       Activo: true,
-    };
-
-    Items.docs.push(itemToCreate);
+      Especial: _body.Especial,
+      Tipo: _body.Tipo,
+    });
 
     res
       .send({
@@ -85,9 +100,36 @@ const Create = async (req, res, next) => {
   }
 };
 
+const ToggleActivoItemMenu = async (req, res, next) => {
+  try {
+    const idIM = req.params._id;
+
+    const oldItem = await ItemMenu.findOne({ _id: idIM }).lean().exec();
+
+    const newItem = await ItemMenu.findByIdAndUpdate(
+      { _id: idIM },
+      {
+        Activo: !oldItem.Activo,
+      },
+      { new: true }
+    );
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: newItem,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
-  GetAll,
-  GetById,
-  Update,
-  Create,
+  GetItemsMenuByRestaurante,
+  GetItemMenuById,
+  UpdateItemMenu,
+  CreateItemMenu,
+  ToggleActivoItemMenu,
 };

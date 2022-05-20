@@ -12,40 +12,40 @@ const Joi = require("joi");
 // Activo: faker.datatype.boolean(),
 
 const _id = Joi.string();
-const NoReservacion = Joi.number();
 const UsuarioReservo = Joi.string();
 const Restaurante = Joi.string();
-const Horario = Joi.string();
+const Horario = Joi.number();
 const Dia = Joi.date();
 const Costo = Joi.number().min(0);
 const FechaCreacion = Joi.date();
 const FechaModificacion = Joi.date().greater(Joi.ref("FechaCreacion"));
 const Activo = Joi.boolean();
+const Pagado = Joi.boolean();
 
 const createReservacion = Joi.object({
-  _id: _id.allow(null, "empty"),
-  NoReservacion: NoReservacion.required(),
+  _id: _id.allow(null, ""),
   UsuarioReservo: UsuarioReservo.required(),
   Restaurante: Restaurante.required(),
   Horario: Horario.required(),
   Dia: Dia.required(),
   Costo: Costo.required(),
-  FechaCreacion: FechaCreacion.default(Date.now).required(),
+  FechaCreacion: FechaCreacion.allow(null),
   FechaModificacion: FechaModificacion.allow(null),
   Activo: Activo.default(true).required(),
+  Pagado: Pagado.required(),
 });
 
 const updateReservacion = Joi.object({
   _id: _id.required(),
-  NoReservacion: NoReservacion,
   UsuarioReservo: UsuarioReservo,
   Restaurante: Restaurante,
   Horario: Horario,
   Dia: Dia.required(),
   Costo: Costo.required(),
   FechaCreacion: FechaCreacion,
-  FechaModificacion: FechaModificacion.default(Date.now).required(),
+  FechaModificacion: FechaModificacion.allow(null),
   Activo: Activo,
+  Pagado: Pagado,
 });
 
 const getReservacion = Joi.object({
