@@ -12,31 +12,23 @@ const Joi = require("joi");
 const _id = Joi.string();
 const UsuarioReview = Joi.string();
 const Restaurante = Joi.string();
-const Calificacion = Joi.number().min(0).max(10);
 const Comentario = Joi.string();
 const FechaCalificacion = Joi.date();
-const FechaVisita = Joi.date().less(Joi.ref("FechaCalificacion"));
 const Activo = Joi.boolean();
 
 const createReview = Joi.object({
-  _id: _id.allow(null, "empty"),
+  _id: _id.allow(null, ""),
   UsuarioReview: UsuarioReview.required(),
   Restaurante: Restaurante.required(),
-  Calificacion: Calificacion.required(),
   Comentario: Comentario.required(),
-  FechaCalificacion: FechaCalificacion.default(Date.now).required(),
-  FechaVisita: FechaVisita.required(),
+  FechaCalificacion: FechaCalificacion.allow(null).optional(),
   Activo: Activo.default(true).required(),
 });
 
 const updateReview = Joi.object({
   _id: _id.required(),
-  UsuarioReview: UsuarioReview,
-  Restaurante: Restaurante,
-  Calificacion: Calificacion,
   Comentario: Comentario,
-  FechaCalificacion: FechaCalificacion.default(Date.now).required(),
-  FechaVisita: FechaVisita,
+  FechaCalificacion: FechaCalificacion.allow(null).optional(),
   Activo: Activo,
 });
 
@@ -44,4 +36,9 @@ const getReview = Joi.object({
   _id: _id.required(),
 });
 
-module.exports = { createReview, updateReview, getReview };
+const getReviewsByRestaurante = Joi.object({
+  _idUser: _id.required(),
+  _idRestaurante: _id.required(),
+});
+
+module.exports = { createReview, updateReview, getReview, getReviewsByRestaurante };

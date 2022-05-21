@@ -1,15 +1,15 @@
-const boom = require("@hapi/boom");
-const faker = require("faker");
-const ReviewModel = require("./review.model");
-var Reviews = new ReviewModel();
+const Reservacion = require("../reservacion/reservacion.model");
+const Review = require("./review.model");
 
 const GetAll = async (req, res, next) => {
   try {
+    const reviews = await Review.find({}).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: Reviews.docs,
+        data: reviews,
       })
       .end();
   } catch (error) {
@@ -20,13 +20,14 @@ const GetAll = async (req, res, next) => {
 const GetById = async (req, res, next) => {
   try {
     const _params = req.params;
-    const _review = Reviews.docs.find((r) => r._id == _params._id);
-    if (!_review) throw boom.notFound("No se encontró la Review con esta Id");
+
+    const review = await Review.findById({ _id: _params._id }).lean().exec();
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _review,
+        data: review,
       })
       .end();
   } catch (error) {
@@ -38,15 +39,24 @@ const Update = async (req, res, next) => {
   try {
     const _params = req.params;
     const _body = req.body;
-    const indexDoc = Reviews.docs.findIndex((r) => r._id == _params._id);
-    if (indexDoc == -1) throw boom.notFound("No se encontró la Review con esta Id");
-    Reviews.docs[indexDoc] = _body;
-    const _review = Reviews.docs[indexDoc];
+
+    const reviewUpd = await Review.findByIdAndUpdate(
+      { _id: _params._id },
+      {
+        Comentario: _body.Comentario,
+        FechaCalificacion: new Date().toISOString(),
+        Activo: _body.Activo,
+      },
+      {
+        new: true,
+      }
+    );
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: _review,
+        data: reviewUpd,
       })
       .end();
   } catch (error) {
@@ -57,22 +67,67 @@ const Update = async (req, res, next) => {
 const Create = async (req, res, next) => {
   try {
     const _body = req.body;
-    var reviewToCreate = {
-      _id: faker.datatype.uuid(),
-      UsuarioReview: faker.datatype.uuid(),
-      Restaurante: faker.datatype.uuid(),
-      Calificacion: _body.Calificacion,
+
+    const review = await Review.create({
+      UsuarioReview: _body.UsuarioReview,
+      Restaurante: _body.Restaurante,
       Comentario: _body.Comentario,
-      FechaCalificacion: faker.date.past(),
-      FechaVisita: faker.date.past(),
+      FechaCalificacion: new Date().toISOString(),
       Activo: true,
-    };
-    Reviews.docs.push(reviewToCreate);
+    });
+
     res
       .send({
         success: true,
         message: "Petición Exitosa",
-        data: reviewToCreate,
+        data: review,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetByRestaurante = async (req, res, next) => {
+  try {
+    const _p = req.params;
+
+    const reviews = await Review.find({ Restaurante: _p._id })
+      .populate("UsuarioReview", "Nombre Imagen")
+      .lean()
+      .exec();
+
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: reviews,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const CanReview = async (req, res, next) => {
+  try {
+    const _p = req.params;
+    var permiso = false;
+
+    const canRev = await Reservacion.findOne({
+      Pagado: true,
+      UsuarioReservo: _p._idUser,
+      Restaurante: _p._idRestaurante,
+    })
+      .lean()
+      .exec();
+
+    if (canRev !== null) permiso = true;
+    res
+      .send({
+        success: true,
+        message: "Petición Exitosa",
+        data: permiso,
       })
       .end();
   } catch (error) {
@@ -85,4 +140,6 @@ module.exports = {
   GetById,
   Update,
   Create,
+  GetByRestaurante,
+  CanReview,
 };

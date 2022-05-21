@@ -1,27 +1,33 @@
-const faker = require("faker");
+const mongoose = require("mongoose");
 
-class ReviewModel {
-  constructor() {
-    this.docs = [];
-    this.generate();
-  }
+const ReviewSchema = new mongoose.Schema(
+  {
+    UsuarioReview: {
+      type: mongoose.Types.ObjectId,
+      ref: "Usuario",
+      required: true,
+    },
+    Restaurante: {
+      type: mongoose.Types.ObjectId,
+      ref: "Restaurante",
+      required: true,
+    },
+    Comentario: {
+      type: String,
+      required: true,
+    },
+    FechaCalificacion: {
+      type: String,
+      required: true,
+    },
+    Activo: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  { versionKey: false }
+);
 
-  generate() {
-    for (let index = 0; index < 20; index++) {
-      var _review = {
-        _id: faker.datatype.uuid(),
-        UsuarioReview: faker.datatype.uuid(),
-        Restaurante: faker.datatype.uuid(),
-        Calificacion: faker.datatype.number(),
-        Comentario: faker.lorem.sentence(),
-        FechaCalificacion: faker.date.past(),
-        FechaVisita: faker.date.past(),
-        Activo: faker.datatype.boolean(),
-      };
+const Review = mongoose.model("Review", ReviewSchema);
 
-      this.docs.push(_review);
-    }
-  }
-}
-
-module.exports = ReviewModel;
+module.exports = Review;
